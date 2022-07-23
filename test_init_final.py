@@ -378,7 +378,7 @@ def init():
 			
 		if basicSetting[11] != "":
 			basicSetting[11] = int(basicSetting[11])
-			
+
 		if basicSetting[18] != "":
 			basicSetting[18] = int(basicSetting[18])
 
@@ -1054,7 +1054,7 @@ class taskCog(commands.Cog):
 				################ 킬 목록 초기화 ################ 
 				if kill_Time.strftime('%Y-%m-%d ') + kill_Time.strftime('%H:%M') == now.strftime('%Y-%m-%d ') + now.strftime('%H:%M'):
 					kill_Time = kill_Time + datetime.timedelta(days=int(1))
-					await init_data_list('kill_list.ini', '-----척살명단-----')
+					await init_data_list('kill_list.ini', '-----부캐명단-----')
 
 				################ 고정 보스 확인 ################ 
 				for i in range(fixed_bossNum):
@@ -1177,7 +1177,7 @@ class taskCog(commands.Cog):
 							aftr = tmp_aftr2
 						if (bossTime[i]+datetime.timedelta(days=-365)) <= aftr:
 							if basicSetting[2] != '0' and basicSetting[22] != '0' and bossFlag[i] == True and bossFlag0[i] == True and bossMungFlag[i] == True :
-								if int(basicSetting[17]) <= bossMungCnt[i] and int(basicSetting[17]) != 0:
+								if int(basicSetting[17]) <= bossMungCnt[i] and int(basicSetting[17]) != 0 and bossData[i][2] == "1":
 									bossTime[i] = datetime.datetime.now()+datetime.timedelta(days=365, hours = int(basicSetting[0]))
 									tmp_bossTime[i] =  datetime.datetime.now()+datetime.timedelta(days=365, hours = int(basicSetting[0]))
 									bossTimeString[i] = '99:99:99'
@@ -1258,7 +1258,7 @@ class taskCog(commands.Cog):
 					continue
 				t.cancel()
 		await dbSave()
-		await data_list_Save("kill_list.ini", "-----척살명단-----", kill_Data)
+		await data_list_Save("kill_list.ini", "-----부캐명단-----", kill_Data)
 		await data_list_Save("item_list.ini", "-----아이템목록-----", item_Data)
 
 		boss_task = asyncio.Task(self.boss_check())
@@ -1474,7 +1474,7 @@ class mainCog(commands.Cog):
 			if basicSetting[11] != "" :
 				setting_val += '정산채널 : ' + self.bot.get_channel(int(basicSetting[11])).name + '\n'
 			if basicSetting[18] != "" :
-				setting_val += '척살채널 : ' + self.bot.get_channel(int(basicSetting[18])).name + '\n'
+				setting_val += '부캐채널 : ' + self.bot.get_channel(int(basicSetting[18])).name + '\n'
 			if basicSetting[19] != "" :
 				setting_val += '경주채널 : ' + self.bot.get_channel(int(basicSetting[19])).name + '\n'
 			if basicSetting[20] != "" :
@@ -1768,7 +1768,7 @@ class mainCog(commands.Cog):
 						bossTimeString[i] = tmp_bossTime[i].strftime('%H:%M:%S')
 						bossDateString[i] = tmp_bossTime[i].strftime('%Y-%m-%d')
 			await dbSave()
-			await data_list_Save("kill_list.ini", "-----척살명단-----", kill_Data)
+			await data_list_Save("kill_list.ini", "-----명단-----", kill_Data)
 			await data_list_Save("item_list.ini", "-----아이템목록-----", item_Data)
 			for voice_client in self.bot.voice_clients:
 				if voice_client.is_playing():
@@ -2244,7 +2244,7 @@ class mainCog(commands.Cog):
 			msg = ctx.message.content[len(ctx.invoked_with)+1:]
 			sayMessage = msg
 			try:
-				await MakeSound(ctx.message.author.display_name +'님이, ' + sayMessage, './sound/say')
+				await MakeSound(sayMessage, './sound/say')
 			except:
 				await ctx.send( f"```음성파일 생성에 실패하였습니다.!(amazon polly 사용시 키 값을 확인하세요!)```")
 				return
@@ -2699,7 +2699,7 @@ class mainCog(commands.Cog):
 				await ctx.send( embed=embed, tts=False)
 
 			await dbSave()
-			await data_list_Save("kill_list.ini", "-----척살명단-----", kill_Data)
+			await data_list_Save("kill_list.ini", "-----명단-----", kill_Data)
 			await data_list_Save("item_list.ini", "-----아이템목록-----", item_Data)
 		else:
 			return
@@ -2715,8 +2715,8 @@ class mainCog(commands.Cog):
 
 			kill_Data = {}
 			
-			await init_data_list('kill_list.ini', '-----척살명단-----')
-			return await ctx.send( '< 킬 목록 초기화완료 >', tts=False)
+			await init_data_list('kill_list.ini', '-----부캐명단-----')
+			return await ctx.send( '< 부캐 목록 초기화완료 >', tts=False)
 		else:
 			return
 
@@ -2732,7 +2732,7 @@ class mainCog(commands.Cog):
 			if not args:
 				kill_output = ''
 				for key, value in kill_Data.items():
-					kill_output += ':skull_crossbones: ' + str(key) + ' : ' + str(value) + '번 따히!\n'
+					kill_output += str(key) + '\n'
 
 				if kill_output != '' :
 					embed = discord.Embed(
@@ -2741,7 +2741,7 @@ class mainCog(commands.Cog):
 							)
 				else :
 					embed = discord.Embed(
-							description= '등록된 킬 목록이 없습니다. 분발하세요!',
+							description= '등록된 부캐 목록이 없습니다.',
 							color=0xff00ff
 							)
 				return await ctx.send(embed=embed, tts=False)
@@ -2752,7 +2752,7 @@ class mainCog(commands.Cog):
 				kill_Data[args] = 1
 					
 			embed = discord.Embed(
-					description= ':skull_crossbones: ' + args + ' 따히! [' + str(kill_Data[args]) + '번]\n',
+					description= args + ' 추가\n',
 					color=0xff00ff
 					)
 			return await ctx.send(embed=embed, tts=False)
