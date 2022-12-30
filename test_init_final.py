@@ -891,7 +891,7 @@ class taskCog(commands.Cog):
 		if ctx.message.channel.id != basicSetting[7]:
 			return
 
-		for t in asyncio.Task.all_tasks():
+		for t in asyncio.all_tasks():
 			# print(t._coro.__name__)
 			if t._coro.__name__ == f"boss_check":
 				if t.done():
@@ -1247,7 +1247,7 @@ class taskCog(commands.Cog):
 				voice_client.stop()
 			await voice_client.disconnect(force=True)
 
-		for t in asyncio.Task.all_tasks():
+		for t in asyncio.all_tasks():
 			if t._coro.__name__ == f"boss_check":
 				print("-------------")
 				if t.done():
